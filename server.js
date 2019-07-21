@@ -45,7 +45,7 @@ async function verifyToken(req, res, next) {
 
 const cors = require('cors');
 
-app.use(cors());
+server.use(cors());
 
 server.use('/', verifyToken);
 
