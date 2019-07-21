@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Sample FirebaseUI App</title>
+    <!-- *******************************************************************************************
+       * TODO(DEVELOPER): Paste the initialization snippet from:
+       * Firebase Console > Overview > Add Firebase to your web app. *
+       ***************************************************************************************** -->
+    <script src="https://cdn.firebase.com/libs/firebaseui/4.1.0/firebaseui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/4.1.0/firebaseui.css" />
+  </head>
+  <body>
+    <!-- The surrounding HTML is left untouched by FirebaseUI.
+         Your app may use that space for branding, controls and other customizations.-->
+    <div>
+      <button>Login/Signup With Google Via Firebase SDK</button>
+      <p>Token : <span id="token"></span></p>
+      <button>Decode Token Via Node.js Backend</button>
+      <p>Response : <span id="response"></span></p>
+    </div>
+        <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+  
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.3.1/firebase-app.js"></script>
+  
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/6.3.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.3.1/firebase-firestore.js"></script>
+    <script type="text/javascript">
+    
+      const firebaseConfig = {
+        apiKey: "AIzaSyB_E0vtRv4GMg3cnKvzN4wy3saUiK06s54",
+        authDomain: "test-auth-5e3a7.firebaseapp.com",
+        databaseURL: "https://test-auth-5e3a7.firebaseio.com",
+        projectId: "test-auth-5e3a7",
+        storageBucket: "",
+        messagingSenderId: "166430521341",
+        appId: "1:166430521341:web:84fa09d3c7b5b5ff"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+
+      var tokenId = window.localStorage.getItem('tokenId') || ''
+
+      document.getElementById("token").innerText = tokenId
+
+      var signWithGoogle = ()=>{
+
+        var provider = new firebase.auth.GoogleAuthProvider();
+
+        firebase.auth().signInWithPopup(provider).then(function(result) {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          var token = result.credential.accessToken;
+          // The signed-in user info.
+          var user = result.user;
+          // ...
+          result.user.getIdTokenResult().then(r => {
+            tokenId = r.token
+            window.localStorage.setItem('tokenId', tokenId) 
+            document.getElementById("token").innerText = token
+          })
+        }).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          var credential = error.credential;
+          // ...
+        });
+      }
+      
+      var decodeToken = ()=>{
+        console.log(tokenId)
+        axios.get('https://tranquil-dawn-92919.herokuapp.com/verify-auth-token',{
+          headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': tokenId
+                }
+        }).then(r => {
+          console.log(r)
+            document.getElementById("response").innerText = JSON.stringify(r.data, undefined, 4)
+          })
+      }
+
+      document.getElementsByTagName('button')[0].addEventListener('click', signWithGoogle)
+      document.getElementsByTagName('button')[1].addEventListener('click', decodeToken)
+    </script>
+
+  </body>
+</html>
